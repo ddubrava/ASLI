@@ -1,0 +1,23 @@
+:host {
+  display: block;
+  height: 100%;
+  margin-top: 15px;
+}
+
+.search-control {
+  width: 100%;
+}
+
+.parameter {
+  display: flex;
+  align-items: center;
+
+  &__color-picker {
+    width: 50px;
+    height: 24px;
+    margin-right: -18px;
+    border: none;
+    appearance: none;
+    background: transparent;
+  }
+}

@@ -1,0 +1,19 @@
+<form [formGroup]="menuFormGroup">
+  <button mat-button [matMenuTriggerFor]="menu">Меню</button>
+
+  <mat-menu #menu="matMenu">
+    <button mat-menu-item [matMenuTriggerFor]="zoning">Зонирование</button>
+  </mat-menu>
+
+  <mat-menu #zoning="matMenu">
+    <mat-radio-group formControlName="zoning">
+      <button mat-menu-item>
+        <mat-radio-button [value]="1">Расставить графики</mat-radio-button>
+      </button>
+
+      <button mat-menu-item>
+        <mat-radio-button [value]="2">Совместить графики</mat-radio-button>
+      </button>
+    </mat-radio-group>
+  </mat-menu>
+</form>

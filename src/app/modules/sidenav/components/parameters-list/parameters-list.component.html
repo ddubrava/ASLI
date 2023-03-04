@@ -1,0 +1,37 @@
+<mat-form-field *ngIf="showSearch" class="search-control">
+  <mat-label>Поиск по параметрам</mat-label>
+  <input matInput [formControl]="searchFormControl" />
+</mat-form-field>
+
+<ng-container *ngIf="controls$ | async as controls">
+  <ng-container *ngIf="controls.length > 0; else emptyList">
+    <div *ngFor="let control of controls" [formGroup]="control" class="parameter">
+      <input
+        matInput
+        type="color"
+        list="presetColors"
+        formControlName="color"
+        class="parameter__color-picker"
+        [value]="control.value.color"
+      />
+
+      <datalist id="presetColors">
+        <option *ngFor="let color of presetColors" [value]="color"></option>
+      </datalist>
+
+      <!-- we shouldn't use checked/value since we use ReactiveForms
+      but somehow it doesn't work -->
+      <mat-checkbox
+        formControlName="selected"
+        [checked]="control.value.selected"
+        [disabled]="!(control.value.selected || canSelect)"
+      >
+        {{ control.value.title }}
+      </mat-checkbox>
+    </div>
+  </ng-container>
+
+  <ng-template #emptyList>
+    <p>{{ showSearch ? 'Параметры не найдены' : 'Параметры не выбраны' }}</p>
+  </ng-template>
+</ng-container>
