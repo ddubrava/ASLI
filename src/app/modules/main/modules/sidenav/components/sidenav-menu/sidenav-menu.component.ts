@@ -1,9 +1,9 @@
 import { ChangeDetectionStrategy, Component, OnDestroy, OnInit } from '@angular/core';
-import { OptionsService } from '../../../../shared/services/options/options.service';
+import { OptionsService } from '../../../../../../shared/services/options/options.service';
 import { FormBuilder } from '@angular/forms';
 import { Subject, takeUntil } from 'rxjs';
-import { Options } from '../../../../shared/types/options';
-import { defaultOptions } from '../../../../shared/const/default-options';
+import { Options } from '../../../../../../shared/types/options';
+import { defaultOptions } from '../../../../../../shared/const/default-options';
 
 @Component({
   selector: 'app-sidenav-menu',

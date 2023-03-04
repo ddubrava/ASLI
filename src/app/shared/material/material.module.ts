@@ -10,6 +10,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatRadioModule } from '@angular/material/radio';
 import { DragDropModule } from '@angular/cdk/drag-drop';
+import { MatTableModule } from '@angular/material/table';
 
 const dependencies = [
   MatSidenavModule,
@@ -23,6 +24,7 @@ const dependencies = [
   MatSlideToggleModule,
   MatRadioModule,
   DragDropModule,
+  MatTableModule,
 ];
 
 @NgModule({

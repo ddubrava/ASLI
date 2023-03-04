@@ -1,8 +1,8 @@
 import { ChangeDetectionStrategy, Component, Input, OnDestroy } from '@angular/core';
 import { FormBuilder, FormControl } from '@angular/forms';
 import { combineLatest, map, startWith, Subject } from 'rxjs';
-import { ParametersService } from '../../../../shared/services/parameters/parameters.service';
-import { presetColors } from '../../../../shared/const/preset-colors';
+import { ParametersService } from '../../../../../../shared/services/parameters/parameters.service';
+import { presetColors } from '../../../../../../shared/const/preset-colors';
 
 @Component({
   selector: 'app-parameters-list',

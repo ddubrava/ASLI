@@ -1,12 +1,13 @@
-import {app, BrowserWindow, Menu, screen} from 'electron';
+import { app, BrowserWindow, Menu, screen, ipcMain, MenuItemConstructorOptions } from 'electron';
 import * as path from 'path';
 import * as fs from 'fs';
-import {MenuEvent} from "./types/menu-event";
-import MenuItemConstructorOptions = Electron.MenuItemConstructorOptions;
+
+import { MenuClickEvent } from './types/menu-click-event';
 
 let win: BrowserWindow = null;
-const args = process.argv.slice(1),
-  serve = args.some(val => val === '--serve');
+
+const args = process.argv.slice(1);
+const serve = args.some((val) => val === '--serve');
 
 const buildMenu = (win: BrowserWindow) => {
   const template: MenuItemConstructorOptions[] = [
@@ -27,7 +28,7 @@ const buildMenu = (win: BrowserWindow) => {
         {
           label: 'Статистика',
           click() {
-            win.webContents.send(MenuEvent.OpenStatistics);
+            win.webContents.send(MenuClickEvent.Statistics);
           },
         },
       ],
@@ -53,8 +54,8 @@ const createWindow = (): BrowserWindow => {
     height: size.height,
     webPreferences: {
       nodeIntegration: true,
-      allowRunningInsecureContent: (serve),
-      contextIsolation: false,  // false if you want to run e2e test with Spectron
+      allowRunningInsecureContent: serve,
+      contextIsolation: false, // false if you want to run e2e test with Spectron
     },
   });
 
@@ -71,7 +72,7 @@ const createWindow = (): BrowserWindow => {
     let pathIndex = './index.html';
 
     if (fs.existsSync(path.join(__dirname, '../dist/index.html'))) {
-       // Path when running electron in local folder
+      // Path when running electron in local folder
       pathIndex = '../dist/index.html';
     }
 
@@ -88,7 +89,7 @@ const createWindow = (): BrowserWindow => {
   });
 
   return win;
-}
+};
 
 try {
   // This method will be called when Electron has finished
@@ -113,7 +114,6 @@ try {
       createWindow();
     }
   });
-
 } catch (e) {
   // Catch Error
   // throw e;

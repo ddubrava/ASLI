@@ -1,11 +1,13 @@
 import { AfterViewInit, ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
 import * as echarts from 'echarts';
-import { ParametersService } from '../../shared/services/parameters/parameters.service';
-import { DatasetService } from '../../shared/services/dataset/dataset.service';
+import { ParametersService } from '../../../../shared/services/parameters/parameters.service';
+import { DatasetService } from '../../../../shared/services/dataset/dataset.service';
 import { combineLatest, Subject, takeUntil } from 'rxjs';
 import { chartOption } from './const/chart-option';
-import { OptionsService } from '../../shared/services/options/options.service';
-import { ZoningType } from '../../shared/types/zoning-type';
+import { OptionsService } from '../../../../shared/services/options/options.service';
+import { ZoningType } from '../../../../shared/types/zoning-type';
+import { DataZoomService } from '../../../../shared/services/data-zoom/data-zoom.service';
+import { DataZoomOption } from 'echarts/types/src/component/dataZoom/DataZoomModel';
 
 @Component({
   selector: 'app-chart',
@@ -26,12 +28,14 @@ export class ChartComponent implements AfterViewInit, OnDestroy {
     private parametersService: ParametersService,
     private optionsService: OptionsService,
     private datasetService: DatasetService,
+    private dataZoomService: DataZoomService,
   ) {}
 
   ngAfterViewInit() {
     this.initChart();
     this.setOption(chartOption(1));
     this.onParametersAndOptionsChange();
+    this.onDataZoomChanges();
   }
 
   ngOnDestroy() {
@@ -54,15 +58,15 @@ export class ChartComponent implements AfterViewInit, OnDestroy {
       .subscribe(([parameters, options]) => {
         const dataset = this.datasetService.getData(parameters);
 
-        const option = {
+        const option: echarts.EChartsOption = {
           ...chartOption(dataset.length, options.zoning === ZoningType.Arrange),
           dataset,
         };
 
         parameters.forEach((param) => {
           if (param.selected) {
-            // @todo find index by title. refactor this later. complexity is awful
-            const index = dataset.findIndex((v) => Object.keys(v.source[0])[1] === param.title);
+            const index = dataset.findIndex((v) => v.source[0].name === param.title);
+
             option.yAxis[index].name = param.title;
             option.yAxis[index].nameTextStyle = { color: param.color };
             option.series[index].lineStyle = { color: param.color };
@@ -71,5 +75,16 @@ export class ChartComponent implements AfterViewInit, OnDestroy {
 
         this.setOption(option);
       });
+  }
+
+  private onDataZoomChanges() {
+    this.chart.on('dataZoom', () => {
+      const { startValue, endValue } = this.chart.getOption().dataZoom[0];
+
+      this.dataZoomService.dataZoom$.next({
+        startValue: startValue as number,
+        endValue: endValue as number,
+      });
+    });
   }
 }

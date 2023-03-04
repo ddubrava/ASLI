@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { debounceTime, Observable } from 'rxjs';
+import { debounceTime, defer, Observable, startWith, tap } from 'rxjs';
 import { FormBuilder } from '@angular/forms';
 import { presetColors } from '../../const/preset-colors';
 import { Parameter } from '../../types/parameter';
@@ -18,9 +18,16 @@ const PARAMETERS = [
 export class ParametersService {
   readonly parametersFormArray = this.initParameters();
 
-  readonly parameters$ = this.parametersFormArray.valueChanges.pipe(
-    debounceTime(100),
-  ) as Observable<Parameter[]>;
+  /**
+   * @todo parameters change break dataZoom
+   */
+  readonly parameters$ = defer(
+    () =>
+      this.parametersFormArray.valueChanges.pipe(
+        startWith(this.parametersFormArray.value),
+        debounceTime(100),
+      ) as Observable<Parameter[]>,
+  );
 
   constructor(private fb: FormBuilder) {}
 
