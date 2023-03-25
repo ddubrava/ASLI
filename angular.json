@@ -7,7 +7,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "angular-electron": {
+    "graph-visualizer": {
       "root": "",
       "sourceRoot": "src",
       "projectType": "application",
@@ -114,27 +114,27 @@
         "serve": {
           "builder": "@angular-builders/custom-webpack:dev-server",
           "options": {
-            "browserTarget": "angular-electron:build"
+            "browserTarget": "graph-visualizer:build"
           },
           "configurations": {
             "dev": {
-              "browserTarget": "angular-electron:build:dev"
+              "browserTarget": "graph-visualizer:build:dev"
             },
             "production": {
-              "browserTarget": "angular-electron:build:production"
+              "browserTarget": "graph-visualizer:build:production"
             },
             "web": {
-              "browserTarget": "angular-electron:build:web"
+              "browserTarget": "graph-visualizer:build:web"
             },
             "web-production": {
-              "browserTarget": "angular-electron:build:web-production"
+              "browserTarget": "graph-visualizer:build:web-production"
             }
           }
         },
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "angular-electron:build"
+            "browserTarget": "graph-visualizer:build"
           }
         },
         "test": {
@@ -170,7 +170,7 @@
         }
       }
     },
-    "angular-electron-e2e": {
+    "graph-visualizer-e2e": {
       "root": "e2e",
       "projectType": "application",
       "architect": {
@@ -185,7 +185,7 @@
       }
     }
   },
-  "defaultProject": "angular-electron",
+  "defaultProject": "graph-visualizer",
   "schematics": {
     "@angular-eslint/schematics:application": {
       "setParserOptionsProject": true
