@@ -11,4 +11,8 @@ export interface DataSource {
    * Parameter name
    */
   name: string;
+  /**
+   * Parameter unit of measurement
+   */
+  unit: string;
 }

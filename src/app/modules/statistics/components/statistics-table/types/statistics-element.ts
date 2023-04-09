@@ -7,5 +7,5 @@ export interface StatisticsElement {
   expectedValue: number;
   variance: number;
   sigma: number;
-  dimensionality: number;
+  unit: string;
 }

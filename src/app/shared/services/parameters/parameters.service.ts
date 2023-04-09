@@ -5,11 +5,11 @@ import { presetColors } from '../../const/preset-colors';
 import { Parameter } from '../../types/parameter';
 
 const PARAMETERS = [
-  'КРЕпкв Угол крена',
-  'ОМХпкв Угловая скорость',
-  'КУРпкс Угол Курса',
-  'ОМУпкв Угловая скорость',
-  'ТАНпкв Угол Тангажа',
+  ['КРЕпкв Угол крена', 'рад'],
+  ['ОМХпкв Угловая скорость', 'рад/с'],
+  ['КУРпкс Угол Курса', 'рад'],
+  ['ОМУпкв Угловая скорость', 'рад/с'],
+  ['ТАНпкв Угол Тангажа', 'рад'],
 ];
 
 @Injectable({
@@ -32,9 +32,10 @@ export class ParametersService {
   constructor(private fb: FormBuilder) {}
 
   private initParameters() {
-    const array = PARAMETERS.map((title, index) => {
+    const array = PARAMETERS.map(([title, unit], index) => {
       const parameter: Parameter = {
         title,
+        unit,
         color: presetColors[index % presetColors.length],
         selected: false,
       };

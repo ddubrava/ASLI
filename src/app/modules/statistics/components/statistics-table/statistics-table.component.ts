@@ -30,7 +30,7 @@ export class StatisticsTableComponent implements OnInit {
     'expectedValue',
     'variance',
     'sigma',
-    'dimensionality',
+    'unit',
   ];
 
   dataSource$: Subject<StatisticsElement[]> = new Subject();
@@ -49,7 +49,9 @@ export class StatisticsTableComponent implements OnInit {
           data.map(({ source }) => {
             const values = source.map((s) => s.y);
 
-            const color = parameters.find((v) => v.title === source[0].name).color;
+            const parameter = parameters.find((v) => v.title === source[0].name);
+            const { color, unit } = parameter;
+
             const expectedValue = this.getExpectedValue(values);
             const variance = this.getVariance(values, expectedValue);
 
@@ -62,7 +64,7 @@ export class StatisticsTableComponent implements OnInit {
               expectedValue,
               variance,
               sigma: this.getSigma(variance),
-              dimensionality: values.length,
+              unit,
             };
           }),
         );

@@ -39,9 +39,9 @@
     <td mat-cell *matCellDef="let element">{{ element.sigma | number }}</td>
   </ng-container>
 
-  <ng-container matColumnDef="dimensionality">
+  <ng-container matColumnDef="unit">
     <th mat-header-cell *matHeaderCellDef>Размерность</th>
-    <td mat-cell *matCellDef="let element">{{ element.dimensionality }}</td>
+    <td mat-cell *matCellDef="let element">{{ element.unit }}</td>
   </ng-container>
 
   <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>

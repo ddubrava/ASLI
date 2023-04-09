@@ -13,8 +13,8 @@ import { DataZoomService } from './shared/services/data-zoom/data-zoom.service';
   styleUrls: ['./app.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AppComponent implements OnInit, OnDestroy {
-  private readonly destroy$ = new Subject<void>();
+export class AppComponent implements OnInit {
+  private readonly statisticsDestroy$ = new Subject<void>();
 
   private statisticsWindow: Window | null = null;
 
@@ -35,18 +35,13 @@ export class AppComponent implements OnInit, OnDestroy {
     }
   }
 
-  ngOnDestroy() {
-    this.destroy$.next();
-    this.destroy$.complete();
-  }
-
   private openStatistics() {
     /**
      * @todo handle case when window is opened and we need to update the table.
      *    and handle case when window is closed and we should ignore these values
      */
     combineLatest([this.parametersService.parameters$, this.dataZoomService.dataZoom$])
-      .pipe(takeUntil(this.destroy$))
+      .pipe(takeUntil(this.statisticsDestroy$))
       .subscribe(([parameters, dataZoom]) => {
         const data = this.datasetService.getData(parameters, dataZoom);
         const message: StatisticsMessage = { data, parameters };
@@ -62,6 +57,7 @@ export class AppComponent implements OnInit, OnDestroy {
             this.postMessageToStatisticsWindow(message);
 
             this.statisticsWindow.addEventListener('beforeunload', () => {
+              this.statisticsDestroy$.next();
               this.statisticsWindow = null;
             });
           });

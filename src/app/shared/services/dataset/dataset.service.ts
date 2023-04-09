@@ -43,14 +43,15 @@ export class DatasetService {
     const min = this.generateBetween(0, 500);
     const max = this.generateBetween(500, 1000);
 
-    this.data = parameters.map(({ title }) => ({
+    this.data = parameters.map(({ title, unit }) => ({
       source: new Array(100).fill(null).map((_, index) => ({
         /**
          * Order is important.
          */
         x: index * 100,
-        y: this.generateBetween(min, max),
+        y: Number(this.generateBetween(min, max).toFixed(2)),
         name: title,
+        unit,
       })),
     }));
   }

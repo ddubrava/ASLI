@@ -3,7 +3,7 @@ import * as echarts from 'echarts';
 import { ParametersService } from '../../../../shared/services/parameters/parameters.service';
 import { DatasetService } from '../../../../shared/services/dataset/dataset.service';
 import { combineLatest, Subject, takeUntil } from 'rxjs';
-import { chartOption } from './const/chart-option';
+import { getChartOptions } from './const/get-chart-options';
 import { OptionsService } from '../../../../shared/services/options/options.service';
 import { ZoningType } from '../../../../shared/types/zoning-type';
 import { DataZoomService } from '../../../../shared/services/data-zoom/data-zoom.service';
@@ -33,7 +33,7 @@ export class ChartComponent implements AfterViewInit, OnDestroy {
 
   ngAfterViewInit() {
     this.initChart();
-    this.setOption(chartOption(1));
+    this.setOption(getChartOptions(1, true));
     this.onParametersAndOptionsChange();
     this.onDataZoomChanges();
   }
@@ -59,17 +59,28 @@ export class ChartComponent implements AfterViewInit, OnDestroy {
         const dataset = this.datasetService.getData(parameters);
 
         const option: echarts.EChartsOption = {
-          ...chartOption(dataset.length, options.zoning === ZoningType.Arrange),
+          ...getChartOptions(dataset.length, options.zoning === ZoningType.Arrange),
           dataset,
         };
 
         parameters.forEach((param) => {
           if (param.selected) {
+            /**
+             * @todo refactor this complexity and this logic.
+             *   we mix logic from getChartOptions + this. so i think we should everything in getChartOptions
+             */
             const index = dataset.findIndex((v) => v.source[0].name === param.title);
 
             option.yAxis[index].name = param.title;
+            option.xAxis[index].name = 't (сек)';
             option.yAxis[index].nameTextStyle = { color: param.color };
             option.series[index].lineStyle = { color: param.color };
+
+            /**
+             * Options for a tooltip
+             */
+            option.series[index].name = param.title;
+            option.series[index].color = param.color;
           }
         });
 
