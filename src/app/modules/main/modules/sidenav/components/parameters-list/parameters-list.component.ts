@@ -1,8 +1,8 @@
 import { ChangeDetectionStrategy, Component, Input, OnDestroy } from '@angular/core';
-import { FormBuilder, FormControl } from '@angular/forms';
+import { FormControl } from '@angular/forms';
 import { combineLatest, map, startWith, Subject } from 'rxjs';
-import { ParametersService } from '../../../../../../shared/services/parameters/parameters.service';
 import { presetColors } from '../../../../../../shared/const/preset-colors';
+import { ParametersService } from '../../../../../../shared/services/parameters/parameters.service';
 
 @Component({
   selector: 'app-parameters-list',
@@ -34,9 +34,9 @@ export class ParametersListComponent implements OnDestroy {
 
       return controls.filter((control) => {
         const search = searchValue.toLowerCase();
-        const title = control.value.title.toLowerCase();
+        const name = control.value.name.toLowerCase();
 
-        return title.includes(search);
+        return name.includes(search);
       });
     }),
     map((controls) =>
@@ -44,14 +44,10 @@ export class ParametersListComponent implements OnDestroy {
     ),
   );
 
-  constructor(private fb: FormBuilder, private parametersService: ParametersService) {}
+  constructor(private parametersService: ParametersService) {}
 
   get parametersFormArray() {
-    return this.parametersService.parametersFormArray;
-  }
-
-  get canSelect(): boolean {
-    return this.parametersFormArray.controls.filter((control) => control.value.selected).length < 3;
+    return this.parametersService.parameters;
   }
 
   ngOnDestroy() {

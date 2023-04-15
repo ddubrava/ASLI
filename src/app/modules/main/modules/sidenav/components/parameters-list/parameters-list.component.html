@@ -12,21 +12,21 @@
         list="presetColors"
         formControlName="color"
         class="parameter__color-picker"
-        [value]="control.value.color"
       />
 
       <datalist id="presetColors">
         <option *ngFor="let color of presetColors" [value]="color"></option>
       </datalist>
 
-      <!-- we shouldn't use checked/value since we use ReactiveForms
-      but somehow it doesn't work -->
-      <mat-checkbox
-        formControlName="selected"
-        [checked]="control.value.selected"
-        [disabled]="!(control.value.selected || canSelect)"
-      >
-        {{ control.value.title }}
+      <mat-checkbox formControlName="selected">
+        <span
+          class="parameter__name"
+          [matTooltip]="control.value.name"
+          matTooltipPosition="right"
+          [matTooltipShowDelay]="500"
+        >
+          {{ control.value.name }}
+        </span>
       </mat-checkbox>
     </div>
   </ng-container>

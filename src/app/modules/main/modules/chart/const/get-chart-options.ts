@@ -1,53 +1,88 @@
 import * as echarts from 'echarts';
 import { calculateGrid } from '../utils/calculate-grid';
 import { DataSource } from '../../../../../shared/types/data-source';
+import { Data } from '../../../../../shared/types/data';
+import { ParametersByName } from '../../../../../shared/types/parameters-by-name';
 
-const chartXAxis: echarts.EChartsOption['xAxis'] = [
-  {
-    type: 'category',
-  },
-  {
-    type: 'category',
-  },
-  {
-    type: 'category',
-  },
-];
+const getChartXAxis = (
+  size: number,
+  data: DataSource[][],
+  parameters: ParametersByName,
+): echarts.EChartsOption['xAxis'] => {
+  const axes: echarts.EChartsOption['xAxis'] = [];
 
-const chartYAxis: echarts.EChartsOption['yAxis'] = [
-  {
-    type: 'value',
-    axisPointer: {
-      show: false,
-    },
-  },
-  {
-    type: 'value',
-    axisPointer: {
-      show: false,
-    },
-  },
-  {
-    type: 'value',
-    axisPointer: {
-      show: false,
-    },
-  },
-];
+  for (let i = 0; i < size; i++) {
+    axes.push({
+      type: 'time',
+      name: 't',
+    });
+  }
 
-const chartSeries: echarts.EChartsOption['series'] = [
-  {
-    type: 'line',
-  },
-  {
-    type: 'line',
-    datasetIndex: 1,
-  },
-  {
-    type: 'line',
-    datasetIndex: 2,
-  },
-];
+  return axes;
+};
+
+const getChartYAxis = (
+  size: number,
+  data: DataSource[][],
+  parameters: ParametersByName,
+): echarts.EChartsOption['yAxis'] => {
+  const axes: echarts.EChartsOption['yAxis'] = [];
+
+  for (let i = 0; i < size; i++) {
+    const axis: echarts.EChartsOption['yAxis'] = {
+      type: 'value',
+      axisPointer: {
+        show: false,
+      },
+    };
+
+    /**
+     * Data can be empty
+     */
+    if (data[i][0]) {
+      const name = data[i][0].name;
+      const color = parameters[name].color;
+
+      axis.name = name;
+      axis.nameTextStyle = { color };
+    }
+
+    axes.push(axis);
+  }
+
+  return axes;
+};
+
+const geChartSeries = (
+  size: number,
+  data: DataSource[][],
+  parameters: ParametersByName,
+): echarts.EChartsOption['series'] => {
+  const axes: echarts.EChartsOption['series'] = [];
+
+  for (let i = 0; i < size; i++) {
+    const axis: echarts.EChartsOption['series'] = {
+      type: 'line',
+      datasetIndex: i,
+    };
+
+    /**
+     * Data can be empty
+     */
+    if (data[i][0]) {
+      const name = data[i][0].name;
+      const color = parameters[name].color;
+
+      axis.name = name;
+      axis.color = color;
+      axis.lineStyle = { color };
+    }
+
+    axes.push(axis);
+  }
+
+  return axes;
+};
 
 const getAxisPointerConfig = (): echarts.AxisPointerComponentOption => ({
   show: true,
@@ -67,13 +102,16 @@ const getAxisPointerConfig = (): echarts.AxisPointerComponentOption => ({
       const series = params.seriesData[0].value as DataSource;
 
       /**
-       * On zooming in values can be undefined
+       * On zooming in values can be undefined,
+       * it's a ECharts bug, I guess.
        */
       if (!series) {
         return '-';
       }
 
-      return `${series.name} ${series.y} ${series.unit}`;
+      const { name, y, time } = series;
+
+      return `${y}, ${name} (${time})`;
     },
   },
 });
@@ -83,10 +121,11 @@ const getTooltipConfig = (): echarts.TooltipComponentOption => ({
   formatter(params) {
     let text = '';
 
-    text += `${params[0].data.x} секунд`;
+    text += `${(params[0].data as DataSource).time}`;
 
     params.forEach((param) => {
-      text += `<br>${param.marker} ${param.data.name} ${param.data.y} ${param.data.unit}`;
+      const { name, y } = param.data as DataSource;
+      text += `<br>${param.marker} ${y}, ${name}`;
     });
 
     return text;
@@ -94,10 +133,18 @@ const getTooltipConfig = (): echarts.TooltipComponentOption => ({
 });
 
 /**
- * @param size slices xAxis, yAxis and series
+ * @param data data for a dataset
+ * @param parameters selected parameters from a sidenav
  * @param arrange true if ZoningType.Arrange is used
  */
-export const getChartOptions = (size: number, arrange = true): echarts.EChartsOption => {
+export const getChartOptions = (
+  data: Data,
+  parameters: ParametersByName,
+  arrange = true,
+): echarts.EChartsOption => {
+  const dataValues = Object.values(data);
+  const size = dataValues.length;
+
   const option: echarts.EChartsOption = {
     tooltip: null,
     axisPointer: null,
@@ -110,9 +157,10 @@ export const getChartOptions = (size: number, arrange = true): echarts.EChartsOp
         xAxisIndex: [0, 1, 2],
       },
     ],
-    xAxis: chartXAxis.slice(0, size),
-    yAxis: chartYAxis.slice(0, size),
-    series: chartSeries.slice(0, size),
+    xAxis: getChartXAxis(size, dataValues, parameters),
+    yAxis: getChartYAxis(size, dataValues, parameters),
+    series: geChartSeries(size, dataValues, parameters),
+    dataset: dataValues.map((d) => ({ source: d })),
   };
 
   /**

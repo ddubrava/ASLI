@@ -1,6 +1,6 @@
 export interface DataSource {
   /**
-   * Time
+   * Time in milliseconds (Date.getTime)
    */
   x: number;
   /**
@@ -12,7 +12,7 @@ export interface DataSource {
    */
   name: string;
   /**
-   * Parameter unit of measurement
+   * Time without formatting
    */
-  unit: string;
+  time: string;
 }

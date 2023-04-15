@@ -1,6 +1,5 @@
 export interface Parameter {
-  title: string;
-  unit: string;
+  name: string;
   color: string;
   selected: boolean;
 }

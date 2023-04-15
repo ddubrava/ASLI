@@ -1,16 +1,8 @@
-import {
-  ChangeDetectionStrategy,
-  ChangeDetectorRef,
-  Component,
-  NgZone,
-  OnInit,
-  ViewChild,
-} from '@angular/core';
-import { Data } from '../../../../shared/types/data';
+import { ChangeDetectionStrategy, Component, OnInit, ViewChild } from '@angular/core';
 import { StatisticsElement } from './types/statistics-element';
 import { MatTable } from '@angular/material/table';
+import { Subject } from 'rxjs';
 import { StatisticsMessage } from '../../../../shared/types/statistics-message';
-import { Observable, of, Subject } from 'rxjs';
 
 @Component({
   selector: 'app-statistics-table',
@@ -46,25 +38,27 @@ export class StatisticsTableComponent implements OnInit {
         const { data, parameters } = event.data;
 
         this.dataSource$.next(
-          data.map(({ source }) => {
+          Object.values(data).map((source) => {
             const values = source.map((s) => s.y);
 
-            const parameter = parameters.find((v) => v.title === source[0].name);
-            const { color, unit } = parameter;
+            const parameterName = source[0].name;
+            const parameter = parameters[parameterName];
+
+            const [parameterNameWithoutUnit, parameterUnit] = parameterName.split(', ');
 
             const expectedValue = this.getExpectedValue(values);
             const variance = this.getVariance(values, expectedValue);
 
             return {
-              color,
-              parameterName: source[0].name,
+              color: parameter.color,
+              parameterName: parameterNameWithoutUnit,
               minimum: this.getMin(values),
               maximum: this.getMax(values),
               average: this.getAverage(values),
               expectedValue,
               variance,
               sigma: this.getSigma(variance),
-              unit,
+              unit: parameterUnit || '',
             };
           }),
         );

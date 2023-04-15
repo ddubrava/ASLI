@@ -1,8 +1,7 @@
 import { Data } from './data';
-import { Parameter } from './parameter';
-import { DataZoom } from './data-zoom';
+import { ParametersByName } from './parameters-by-name';
 
 export interface StatisticsMessage {
-  data: Data[];
-  parameters: Parameter[];
+  data: Data;
+  parameters: ParametersByName;
 }

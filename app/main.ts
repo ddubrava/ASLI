@@ -1,4 +1,4 @@
-import { app, BrowserWindow, Menu, screen, ipcMain, MenuItemConstructorOptions } from 'electron';
+import { app, BrowserWindow, dialog, Menu, MenuItemConstructorOptions, screen } from 'electron';
 import * as path from 'path';
 import * as fs from 'fs';
 
@@ -14,7 +14,19 @@ const buildMenu = (win: BrowserWindow) => {
     {
       label: 'Файл',
       submenu: [
-        { label: 'Загрузить запись' },
+        {
+          label: 'Загрузить запись',
+          async click() {
+            const { canceled, filePaths } = await dialog.showOpenDialog({
+              properties: ['openFile'],
+              filters: [{ name: 'Tables', extensions: ['csv'] }],
+            });
+
+            if (!canceled) {
+              win.webContents.send(MenuClickEvent.OpenFile, filePaths);
+            }
+          },
+        },
         { label: 'Загрузить параметры' },
         // тут список раннее открытых файлов
       ],

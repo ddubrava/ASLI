@@ -13,11 +13,19 @@
   align-items: center;
 
   &__color-picker {
+    flex-shrink: 0;
     width: 50px;
     height: 24px;
-    margin-right: -18px;
+    margin-right: -30px;
     border: none;
     appearance: none;
     background: transparent;
+  }
+
+  &__name {
+    display: block;
+    width: 250px;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 }

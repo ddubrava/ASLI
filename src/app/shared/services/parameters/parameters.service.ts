@@ -1,48 +1,65 @@
 import { Injectable } from '@angular/core';
-import { debounceTime, defer, Observable, startWith, tap } from 'rxjs';
-import { FormBuilder } from '@angular/forms';
+import { DataService } from '../data/data.service';
+import { FormArray, FormBuilder, FormGroup } from '@angular/forms';
 import { presetColors } from '../../const/preset-colors';
-import { Parameter } from '../../types/parameter';
+import { ParametersForm } from '../../types/parameters-form';
+import { map, Observable, shareReplay } from 'rxjs';
+import { Data } from '../../types/data';
+import { ParametersByName } from '../../types/parameters-by-name';
 
-const PARAMETERS = [
-  ['КРЕпкв Угол крена', 'рад'],
-  ['ОМХпкв Угловая скорость', 'рад/с'],
-  ['КУРпкс Угол Курса', 'рад'],
-  ['ОМУпкв Угловая скорость', 'рад/с'],
-  ['ТАНпкв Угол Тангажа', 'рад'],
-];
-
+/**
+ * This service does not have the best architecture since it mixes sync and async code.
+ * However, the problem is that the data is async, and also making parameters async is very complicated.
+ * That's why we use clear and push to make parameters 'async' just to be responsive to changes.
+ *
+ * Another idea is to navigate to the Main module using resolvers,
+ * but it requires a lot of hacks: such as refreshing the same navigation, creating logic for the resolver to work with the DataService,
+ * and ensuring that the ParametersService is not a singleton.
+ */
 @Injectable({
   providedIn: 'root',
 })
 export class ParametersService {
-  readonly parametersFormArray = this.initParameters();
+  parameters: FormArray<FormGroup<ParametersForm>> = new FormArray([]);
 
-  /**
-   * @todo parameters change break dataZoom
-   */
-  readonly parameters$ = defer(
-    () =>
-      this.parametersFormArray.valueChanges.pipe(
-        startWith(this.parametersFormArray.value),
-        debounceTime(100),
-      ) as Observable<Parameter[]>,
+  selectedParameters$: Observable<ParametersByName> = this.parameters.valueChanges.pipe(
+    map((changes) => changes.filter((parameter) => parameter.selected)),
+    map((parameters) =>
+      parameters.reduce<ParametersByName>((acc, v) => ({ ...acc, [v.name]: v }), {}),
+    ),
+    shareReplay(1),
   );
 
-  constructor(private fb: FormBuilder) {}
+  constructor(private dataService: DataService, private formBuilder: FormBuilder) {
+    this.watchForAllDataChanges();
+    this.watchForParametersChanges();
+  }
 
-  private initParameters() {
-    const array = PARAMETERS.map(([title, unit], index) => {
-      const parameter: Parameter = {
-        title,
-        unit,
+  private watchForAllDataChanges() {
+    this.dataService.allData$.subscribe((allData) => {
+      this.parameters.clear();
+      this.fillFormArray(allData);
+    });
+  }
+
+  private watchForParametersChanges() {
+    this.selectedParameters$.subscribe((parameters) => {
+      const names = Object.keys(parameters);
+      this.dataService.filterByKeys(names);
+    });
+  }
+
+  private fillFormArray(allData: Data) {
+    const parameters = Object.keys(allData);
+
+    parameters.forEach((name, index) => {
+      const group = this.formBuilder.group({
+        name,
         color: presetColors[index % presetColors.length],
         selected: false,
-      };
+      });
 
-      return this.fb.group(parameter);
+      this.parameters.push(group);
     });
-
-    return this.fb.array(array);
   }
 }

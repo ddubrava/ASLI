@@ -1,13 +1,12 @@
 import { AfterViewInit, ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
 import * as echarts from 'echarts';
-import { ParametersService } from '../../../../shared/services/parameters/parameters.service';
-import { DatasetService } from '../../../../shared/services/dataset/dataset.service';
-import { combineLatest, Subject, takeUntil } from 'rxjs';
+import { DataService } from '../../../../shared/services/data/data.service';
+import { combineLatest, debounceTime, Subject, takeUntil } from 'rxjs';
 import { getChartOptions } from './const/get-chart-options';
 import { OptionsService } from '../../../../shared/services/options/options.service';
 import { ZoningType } from '../../../../shared/types/zoning-type';
 import { DataZoomService } from '../../../../shared/services/data-zoom/data-zoom.service';
-import { DataZoomOption } from 'echarts/types/src/component/dataZoom/DataZoomModel';
+import { ParametersService } from '../../../../shared/services/parameters/parameters.service';
 
 @Component({
   selector: 'app-chart',
@@ -16,25 +15,20 @@ import { DataZoomOption } from 'echarts/types/src/component/dataZoom/DataZoomMod
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ChartComponent implements AfterViewInit, OnDestroy {
-  parameters$ = this.parametersService.parameters$;
-
-  options$ = this.optionsService.options$;
-
   private destroy$ = new Subject<void>();
 
   private chart: echarts.ECharts;
 
   constructor(
-    private parametersService: ParametersService,
+    private dataService: DataService,
     private optionsService: OptionsService,
-    private datasetService: DatasetService,
     private dataZoomService: DataZoomService,
+    private parameterService: ParametersService,
   ) {}
 
   ngAfterViewInit() {
     this.initChart();
-    this.setOption(getChartOptions(1, true));
-    this.onParametersAndOptionsChange();
+    this.onDataAndOptionsChanges();
     this.onDataZoomChanges();
   }
 
@@ -52,39 +46,21 @@ export class ChartComponent implements AfterViewInit, OnDestroy {
     this.chart.setOption(option, true);
   }
 
-  private onParametersAndOptionsChange() {
-    combineLatest([this.parameters$, this.options$])
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(([parameters, options]) => {
-        const dataset = this.datasetService.getData(parameters);
-
-        const option: echarts.EChartsOption = {
-          ...getChartOptions(dataset.length, options.zoning === ZoningType.Arrange),
-          dataset,
-        };
-
-        parameters.forEach((param) => {
-          if (param.selected) {
-            /**
-             * @todo refactor this complexity and this logic.
-             *   we mix logic from getChartOptions + this. so i think we should everything in getChartOptions
-             */
-            const index = dataset.findIndex((v) => v.source[0].name === param.title);
-
-            option.yAxis[index].name = param.title;
-            option.xAxis[index].name = 't (сек)';
-            option.yAxis[index].nameTextStyle = { color: param.color };
-            option.series[index].lineStyle = { color: param.color };
-
-            /**
-             * Options for a tooltip
-             */
-            option.series[index].name = param.title;
-            option.series[index].color = param.color;
-          }
-        });
-
-        this.setOption(option);
+  private onDataAndOptionsChanges() {
+    combineLatest([
+      this.dataService.currentData$,
+      this.parameterService.selectedParameters$,
+      this.optionsService.options$,
+    ])
+      .pipe(
+        /**
+         * When currentData & selectedParameters$ are changed at the same time
+         */
+        debounceTime(0),
+        takeUntil(this.destroy$),
+      )
+      .subscribe(([data, parameters, options]) => {
+        this.setOption(getChartOptions(data, parameters, options.zoning === ZoningType.Arrange));
       });
   }
 
