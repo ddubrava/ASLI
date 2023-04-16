@@ -1,13 +1,15 @@
-import { ChangeDetectionStrategy, Component, NgZone, OnInit } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  NgZone,
+  OnInit,
+} from '@angular/core';
 import { ElectronService } from './shared/services/electron/electron.service';
 import { MenuClickEvent } from '../../app/types/menu-click-event';
 import { DataService } from './shared/services/data/data.service';
-import { combineLatest, Subject, takeUntil } from 'rxjs';
-import { StatisticsMessage } from './shared/types/statistics-message';
-import { DataZoomService } from './shared/services/data-zoom/data-zoom.service';
 import { parse } from 'csv-parse';
 import { Router } from '@angular/router';
-import { ParametersService } from './shared/services/parameters/parameters.service';
 
 @Component({
   selector: 'app-root',
@@ -16,17 +18,14 @@ import { ParametersService } from './shared/services/parameters/parameters.servi
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AppComponent implements OnInit {
-  private readonly statisticsDestroy$ = new Subject<void>();
-
-  private statisticsWindow: Window | null = null;
+  showStatisticsComponent = false;
 
   constructor(
     private electronService: ElectronService,
     private dataService: DataService,
-    private dataZoomService: DataZoomService,
-    private parametersService: ParametersService,
     private router: Router,
     private ngZone: NgZone,
+    private cdr: ChangeDetectorRef,
   ) {}
 
   ngOnInit() {
@@ -38,9 +37,13 @@ export class AppComponent implements OnInit {
       });
 
       ipcRenderer.on(MenuClickEvent.Statistics, () => {
-        this.ngZone.run(() => this.openStatistics());
+        this.ngZone.run(() => this.toggleStatisticsComponent());
       });
     }
+  }
+
+  onStatisticsCloseClick() {
+    this.toggleStatisticsComponent();
   }
 
   private async openFile(filePaths: string[]) {
@@ -59,40 +62,10 @@ export class AppComponent implements OnInit {
     this.router.navigateByUrl('main');
   }
 
-  private openStatistics() {
-    combineLatest([
-      this.dataService.currentData$,
-      this.parametersService.selectedParameters$,
-      // this.dataZoomService.dataZoom$,
-    ])
-      .pipe(takeUntil(this.statisticsDestroy$))
-      .subscribe(([data, parameters]) => {
-        const message: StatisticsMessage = { data, parameters };
-
-        if (!this.statisticsWindow) {
-          this.statisticsWindow = window.open(
-            './statistics',
-            '_blank',
-            'width=1400,height=500,autoHideMenuBar=true',
-          );
-
-          this.statisticsWindow.addEventListener('load', () => {
-            this.postMessageToStatisticsWindow(message);
-
-            this.statisticsWindow.addEventListener('beforeunload', () => {
-              this.statisticsDestroy$.next();
-              this.statisticsWindow = null;
-            });
-          });
-
-          return;
-        }
-
-        this.postMessageToStatisticsWindow({ data, parameters });
-      });
-  }
-
-  private postMessageToStatisticsWindow(message: StatisticsMessage) {
-    this.statisticsWindow.postMessage(message);
+  private toggleStatisticsComponent() {
+    if (this.dataService.dataInitiated) {
+      this.showStatisticsComponent = !this.showStatisticsComponent;
+      this.cdr.markForCheck();
+    }
   }
 }

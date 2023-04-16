@@ -8,6 +8,8 @@ const TIME_KEY = 'Time';
   providedIn: 'root',
 })
 export class DataService {
+  dataInitiated = false;
+
   allData$ = new ReplaySubject<Data>(1);
 
   currentData$ = new ReplaySubject<Data>(1);
@@ -39,12 +41,12 @@ export class DataService {
           x: this.parseTime(record[TIME_KEY]),
           y: parsedValue,
           name,
-          time: record[TIME_KEY],
         });
       }
     }
 
     this.allData$.next(data);
+    this.dataInitiated = true;
   }
 
   filterByKeys(keys: string[]) {

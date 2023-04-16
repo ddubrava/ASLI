@@ -14,11 +14,11 @@ import { defaultOptions } from '../../../../../../shared/const/default-options';
 export class SidenavMenuComponent implements OnInit, OnDestroy {
   destroy$ = new Subject<void>();
 
-  menuFormGroup = this.fb.group({
+  menuFormGroup = this.formBuilder.group({
     ...defaultOptions,
   });
 
-  constructor(private optionsService: OptionsService, private fb: FormBuilder) {}
+  constructor(private optionsService: OptionsService, private formBuilder: FormBuilder) {}
 
   ngOnInit(): void {
     this.onMenuGroupChanges();

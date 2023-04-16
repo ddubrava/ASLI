@@ -7,13 +7,19 @@
 
   <mat-menu #zoning="matMenu">
     <mat-radio-group formControlName="zoning">
-      <button mat-menu-item>
-        <mat-radio-button [value]="1">Расставить графики</mat-radio-button>
-      </button>
+      <ng-container
+        *ngTemplateOutlet="zoningButton; context: { title: 'Расставить графики', value: 1 }"
+      ></ng-container>
 
-      <button mat-menu-item>
-        <mat-radio-button [value]="2">Совместить графики</mat-radio-button>
-      </button>
+      <ng-container
+        *ngTemplateOutlet="zoningButton; context: { title: 'Совместить графики', value: 2 }"
+      ></ng-container>
+
+      <ng-template #zoningButton let-value="value" let-title="title">
+        <button (click)="$event.stopPropagation()" mat-menu-item>
+          <mat-radio-button class="radio-button" [value]="value">{{ title }}</mat-radio-button>
+        </button>
+      </ng-template>
     </mat-radio-group>
   </mat-menu>
 </form>

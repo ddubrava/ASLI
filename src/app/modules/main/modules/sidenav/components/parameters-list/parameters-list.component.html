@@ -6,19 +6,26 @@
 <ng-container *ngIf="controls$ | async as controls">
   <ng-container *ngIf="controls.length > 0; else emptyList">
     <div *ngFor="let control of controls" [formGroup]="control" class="parameter">
+      <!-- Form controls with the same formControlName do not work,-->
+      <!-- even in different component instances. That's why we use [value] and [checked].-->
+      <!-- See https://github.com/angular/angular/issues/13792-->
       <input
         matInput
         type="color"
         list="presetColors"
         formControlName="color"
         class="parameter__color-picker"
+        [value]="control.value.color"
       />
 
       <datalist id="presetColors">
         <option *ngFor="let color of presetColors" [value]="color"></option>
       </datalist>
 
-      <mat-checkbox formControlName="selected">
+      <!-- Form controls with the same formControlName do not work,-->
+      <!-- even in different component instances. That's why we use [value] and [checked].-->
+      <!-- See https://github.com/angular/angular/issues/13792-->
+      <mat-checkbox formControlName="selected" [checked]="control.value.selected">
         <span
           class="parameter__name"
           [matTooltip]="control.value.name"

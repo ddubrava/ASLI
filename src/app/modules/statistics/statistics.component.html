@@ -1,1 +1,13 @@
-<app-statistics-table></app-statistics-table>
+<mat-card class="card">
+  <mat-card-header class="card__header">
+    <mat-card-title>Статистика</mat-card-title>
+
+    <button mat-icon-button (click)="close()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </mat-card-header>
+
+  <mat-card-content>
+    <app-statistics-table></app-statistics-table>
+  </mat-card-content>
+</mat-card>

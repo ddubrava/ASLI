@@ -1,4 +1,4 @@
-<mat-drawer-container *ngIf="allData$ | async" class="container">
+<mat-drawer-container *ngIf="allData$ | async; else noData" class="container">
   <mat-drawer class="sidenav" mode="side" [opened]="true">
     <app-sidenav></app-sidenav>
   </mat-drawer>
@@ -7,3 +7,10 @@
     <app-chart></app-chart>
   </div>
 </mat-drawer-container>
+
+<ng-template #noData>
+  <div class="no-data">
+    <h2 class="no-data-title">Необходимо загрузить запись</h2>
+    <p class="no-data-description">Файл - Загрузить запись</p>
+  </div>
+</ng-template>

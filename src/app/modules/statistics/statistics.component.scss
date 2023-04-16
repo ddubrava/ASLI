@@ -1,0 +1,13 @@
+:host {
+  display: block;
+  position: absolute;
+  z-index: 10;
+}
+
+.card {
+  &__header {
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 10px;
+  }
+}

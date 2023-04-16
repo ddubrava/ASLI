@@ -1,8 +1,9 @@
-import { ChangeDetectionStrategy, Component, OnInit, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { StatisticsElement } from './types/statistics-element';
 import { MatTable } from '@angular/material/table';
-import { Subject } from 'rxjs';
-import { StatisticsMessage } from '../../../../shared/types/statistics-message';
+import { combineLatest, debounceTime, Subject, takeUntil } from 'rxjs';
+import { DataService } from '../../../../shared/services/data/data.service';
+import { ParametersService } from '../../../../shared/services/parameters/parameters.service';
 
 @Component({
   selector: 'app-statistics-table',
@@ -10,7 +11,7 @@ import { StatisticsMessage } from '../../../../shared/types/statistics-message';
   styleUrls: ['./statistics-table.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class StatisticsTableComponent implements OnInit {
+export class StatisticsTableComponent implements OnInit, OnDestroy {
   @ViewChild(MatTable) table: MatTable<StatisticsElement>;
 
   displayedColumns = [
@@ -27,16 +28,29 @@ export class StatisticsTableComponent implements OnInit {
 
   dataSource$: Subject<StatisticsElement[]> = new Subject();
 
+  private destroy$ = new Subject<void>();
+
+  constructor(private dataService: DataService, private parametersService: ParametersService) {}
+
   ngOnInit() {
-    window.addEventListener(
-      'message',
-      (event: MessageEvent<StatisticsMessage | { data: undefined; type: string }>) => {
-        if (!event.data || 'type' in event.data) {
-          return;
-        }
+    this.watchForDataAndParametersChanges();
+  }
 
-        const { data, parameters } = event.data;
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
 
+  private watchForDataAndParametersChanges() {
+    combineLatest([this.dataService.currentData$, this.parametersService.selectedParameters$])
+      .pipe(
+        /**
+         * When currentData & selectedParameters$ are changed at the same time
+         */
+        debounceTime(0),
+        takeUntil(this.destroy$),
+      )
+      .subscribe(([data, parameters]) => {
         this.dataSource$.next(
           Object.values(data).map((source) => {
             const values = source.map((s) => s.y);
@@ -62,8 +76,7 @@ export class StatisticsTableComponent implements OnInit {
             };
           }),
         );
-      },
-    );
+      });
   }
 
   private getMin(data: number[]) {

@@ -11,8 +11,4 @@ export interface DataSource {
    * Parameter name
    */
   name: string;
-  /**
-   * Time without formatting
-   */
-  time: string;
 }

@@ -1,1 +1,10 @@
-<router-outlet></router-outlet>
+<div class="container">
+  <app-statistics
+    *ngIf="showStatisticsComponent"
+    cdkDrag
+    cdkDragBoundary=".container"
+    (closeClick)="onStatisticsCloseClick()"
+  ></app-statistics>
+
+  <router-outlet></router-outlet>
+</div>

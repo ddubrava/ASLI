@@ -1,8 +1,9 @@
 import * as echarts from 'echarts';
-import { calculateGrid } from '../utils/calculate-grid';
+import { calculateGrid } from './calculate-grid';
 import { DataSource } from '../../../../../shared/types/data-source';
 import { Data } from '../../../../../shared/types/data';
 import { ParametersByName } from '../../../../../shared/types/parameters-by-name';
+import { convertTimestampToDate } from './convert-timestamp-to-date';
 
 const getChartXAxis = (
   size: number,
@@ -44,7 +45,7 @@ const getChartYAxis = (
       const color = parameters[name].color;
 
       axis.name = name;
-      axis.nameTextStyle = { color };
+      axis.nameTextStyle = { color, align: 'left' };
     }
 
     axes.push(axis);
@@ -64,6 +65,13 @@ const geChartSeries = (
     const axis: echarts.EChartsOption['series'] = {
       type: 'line',
       datasetIndex: i,
+      /**
+       * Otherwise, performance is poor.
+       *
+       * @see https://echarts.apache.org/examples/en/editor.html?c=area-simple
+       */
+      symbol: 'none',
+      sampling: 'lttb',
     };
 
     /**
@@ -109,7 +117,9 @@ const getAxisPointerConfig = (): echarts.AxisPointerComponentOption => ({
         return '-';
       }
 
-      const { name, y, time } = series;
+      const time = convertTimestampToDate(series.x);
+
+      const { name, y } = series;
 
       return `${y}, ${name} (${time})`;
     },
@@ -119,9 +129,9 @@ const getAxisPointerConfig = (): echarts.AxisPointerComponentOption => ({
 const getTooltipConfig = (): echarts.TooltipComponentOption => ({
   trigger: 'axis',
   formatter(params) {
-    let text = '';
+    const time = convertTimestampToDate((params[0].data as DataSource).x);
 
-    text += `${(params[0].data as DataSource).time}`;
+    let text = `${time}`;
 
     params.forEach((param) => {
       const { name, y } = param.data as DataSource;
@@ -155,6 +165,7 @@ export const getChartOptions = (
       },
       {
         xAxisIndex: [0, 1, 2],
+        labelFormatter: (value, valueStr) => valueStr.split(' ').at(-1),
       },
     ],
     xAxis: getChartXAxis(size, dataValues, parameters),

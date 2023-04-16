@@ -2,7 +2,7 @@ import { AfterViewInit, ChangeDetectionStrategy, Component, OnDestroy } from '@a
 import * as echarts from 'echarts';
 import { DataService } from '../../../../shared/services/data/data.service';
 import { combineLatest, debounceTime, Subject, takeUntil } from 'rxjs';
-import { getChartOptions } from './const/get-chart-options';
+import { getChartOptions } from './utils/get-chart-options';
 import { OptionsService } from '../../../../shared/services/options/options.service';
 import { ZoningType } from '../../../../shared/types/zoning-type';
 import { DataZoomService } from '../../../../shared/services/data-zoom/data-zoom.service';

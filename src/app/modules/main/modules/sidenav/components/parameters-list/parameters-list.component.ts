@@ -1,8 +1,9 @@
 import { ChangeDetectionStrategy, Component, Input, OnDestroy } from '@angular/core';
-import { FormControl } from '@angular/forms';
-import { combineLatest, map, startWith, Subject } from 'rxjs';
+import { FormControl, FormGroup } from '@angular/forms';
+import { combineLatest, map, Observable, startWith, Subject } from 'rxjs';
 import { presetColors } from '../../../../../../shared/const/preset-colors';
 import { ParametersService } from '../../../../../../shared/services/parameters/parameters.service';
+import { ParametersForm } from '../../../../../../shared/types/parameters-form';
 
 @Component({
   selector: 'app-parameters-list',
@@ -21,27 +22,29 @@ export class ParametersListComponent implements OnDestroy {
 
   searchFormControl = new FormControl();
 
-  controls$ = combineLatest([
-    this.parametersFormArray.valueChanges.pipe(startWith(this.parametersFormArray.controls)),
+  controls$: Observable<FormGroup<ParametersForm>[]> = combineLatest([
+    this.parametersFormArray.valueChanges.pipe(startWith(null)),
     this.searchFormControl.valueChanges.pipe(startWith('')),
   ]).pipe(
     map(([, searchValue]) => {
       const controls = this.parametersFormArray.controls;
 
-      if (!searchValue) {
-        return controls;
+      if (this.showOnlySelected) {
+        return controls.filter((control) => control.value.selected);
       }
 
-      return controls.filter((control) => {
-        const search = searchValue.toLowerCase();
-        const name = control.value.name.toLowerCase();
+      if (searchValue) {
+        searchValue = searchValue.toLowerCase();
 
-        return name.includes(search);
-      });
+        return controls.filter((control) => {
+          const name = control.value.name.toLowerCase();
+          return name.includes(searchValue);
+        });
+      }
+
+      return controls;
     }),
-    map((controls) =>
-      this.showOnlySelected ? controls.filter((control) => control.value.selected) : controls,
-    ),
+    startWith(this.parametersFormArray.controls),
   );
 
   constructor(private parametersService: ParametersService) {}

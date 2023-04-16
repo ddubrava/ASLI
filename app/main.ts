@@ -27,13 +27,13 @@ const buildMenu = (win: BrowserWindow) => {
             }
           },
         },
-        { label: 'Загрузить параметры' },
+        // { label: 'Загрузить параметры' },
         // тут список раннее открытых файлов
       ],
     },
-    {
-      label: 'Вид',
-    },
+    // {
+    //   label: 'Вид',
+    // },
     {
       label: 'Инструменты',
       submenu: [
@@ -45,10 +45,10 @@ const buildMenu = (win: BrowserWindow) => {
         },
       ],
     },
-    {
-      label: 'Помощь',
-      submenu: [{ label: 'Справка' }, { label: 'О программе' }, { label: 'Версии' }],
-    },
+    // {
+    //   label: 'Помощь',
+    //   submenu: [{ label: 'Справка' }, { label: 'О программе' }, { label: 'Версии' }],
+    // },
   ];
 
   const menu = Menu.buildFromTemplate(template);
