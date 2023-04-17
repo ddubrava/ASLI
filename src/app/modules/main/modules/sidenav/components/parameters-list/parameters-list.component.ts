@@ -1,9 +1,11 @@
-import { ChangeDetectionStrategy, Component, Input, OnDestroy } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
-import { combineLatest, map, Observable, startWith, Subject } from 'rxjs';
+import { combineLatest, map, Observable, startWith, Subject, takeUntil } from 'rxjs';
 import { presetColors } from '../../../../../../shared/const/preset-colors';
 import { ParametersService } from '../../../../../../shared/services/parameters/parameters.service';
 import { ParametersForm } from '../../../../../../shared/types/parameters-form';
+
+const MAX_SELECTED_NUMBER = 3;
 
 @Component({
   selector: 'app-parameters-list',
@@ -11,7 +13,7 @@ import { ParametersForm } from '../../../../../../shared/types/parameters-form';
   styleUrls: ['./parameters-list.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ParametersListComponent implements OnDestroy {
+export class ParametersListComponent implements OnInit, OnDestroy {
   @Input() showOnlySelected = false;
 
   @Input() showSearch = false;
@@ -53,8 +55,44 @@ export class ParametersListComponent implements OnDestroy {
     return this.parametersService.parameters;
   }
 
+  ngOnInit() {
+    this.watchForParametersChanges();
+  }
+
   ngOnDestroy() {
     this.destroy$.next();
     this.destroy$.complete();
+  }
+
+  private watchForParametersChanges() {
+    this.parametersService.parameters.valueChanges.pipe(takeUntil(this.destroy$)).subscribe(() => {
+      this.toggleParameters();
+    });
+  }
+
+  /**
+   * Enables/disabled parameters checkboxes based on MAX_SELECTED_NUMBER.
+   * The logic is not efficient, since we already traverse over parameters in controls$.
+   * But parameters array is small (~250), so all this stuff is pretty fast.
+   */
+  private toggleParameters() {
+    const selected = this.parametersFormArray.controls.reduce(
+      (acc, v) => acc + Number(v.value.selected),
+      0,
+    );
+
+    this.parametersFormArray.controls.forEach((control) => {
+      /**
+       * We need to enable controls whenever selected < MAX_SELECTED_NUMBER,
+       * but technically we care only about MAX_SELECTED_NUMBER - 1.
+       * Assume we have 3/3, all controls are disabled.
+       * To enable them we should have 2/3 => MAX_SELECTED_NUMBER - 1.
+       */
+      if (selected === MAX_SELECTED_NUMBER - 1) {
+        control.enable({ emitEvent: false });
+      } else if (selected === MAX_SELECTED_NUMBER && !control.value.selected) {
+        control.disable({ emitEvent: false });
+      }
+    });
   }
 }
