@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { ReplaySubject, take } from 'rxjs';
 import { Data } from '../../types/data';
+import { convertTimeToTimestamp } from '../../utils/convert-data-to-timestamp';
 
 const TIME_KEY = 'Time';
 
@@ -16,9 +17,11 @@ export class DataService {
 
   init(records: Record<string, string>[]) {
     /**
-     * Records are not sorted, sort them by time
+     * csv-parse does not preserve order of records, so sort them by time
      */
-    records.sort((a, b) => this.parseTime(a[TIME_KEY]) - this.parseTime(b[TIME_KEY]));
+    records.sort(
+      (a, b) => convertTimeToTimestamp(a[TIME_KEY]) - convertTimeToTimestamp(b[TIME_KEY]),
+    );
 
     const data: Data = {};
 
@@ -38,7 +41,7 @@ export class DataService {
         }
 
         data[name].push({
-          x: this.parseTime(record[TIME_KEY]),
+          x: convertTimeToTimestamp(record[TIME_KEY]),
           y: parsedValue,
           name,
         });
@@ -57,22 +60,5 @@ export class DataService {
         Object.fromEntries(Object.entries(allData).filter(([key]) => mustBeSaved.has(key))),
       );
     });
-  }
-
-  /**
-   * Parses hh:mm:ss,sss pattern and returns getTime() (milliseconds)
-   */
-  private parseTime(timeString: string): number {
-    const [time, milliseconds] = timeString.split(',');
-    const [hours, minutes, seconds] = time.split(':');
-
-    const date = new Date();
-
-    date.setHours(Number(hours));
-    date.setMinutes(Number(minutes));
-    date.setSeconds(Number(seconds));
-    date.setMilliseconds(Number(milliseconds));
-
-    return date.getTime();
   }
 }

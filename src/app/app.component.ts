@@ -32,8 +32,8 @@ export class AppComponent implements OnInit {
     const { ipcRenderer } = this.electronService;
 
     if (ipcRenderer) {
-      ipcRenderer.on(MenuClickEvent.OpenFile, (_, filePaths) => {
-        this.ngZone.run(() => this.openFile(filePaths));
+      ipcRenderer.on(MenuClickEvent.OpenFile, (_, filePath) => {
+        this.ngZone.run(() => this.openFile(filePath));
       });
 
       ipcRenderer.on(MenuClickEvent.Statistics, () => {
@@ -46,12 +46,11 @@ export class AppComponent implements OnInit {
     this.toggleStatisticsComponent();
   }
 
-  private async openFile(filePaths: string[]) {
-    const path = filePaths[0];
+  private async openFile(filePath: string) {
     const records = [];
 
     const parser = this.electronService.fs
-      .createReadStream(path)
+      .createReadStream(filePath)
       .pipe(parse({ bom: true, delimiter: ';', columns: true, relax_column_count: true }));
 
     for await (const record of parser) {

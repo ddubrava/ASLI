@@ -19,21 +19,22 @@ const buildMenu = (win: BrowserWindow) => {
           async click() {
             const { canceled, filePaths } = await dialog.showOpenDialog({
               properties: ['openFile'],
-              filters: [{ name: 'Tables', extensions: ['csv'] }],
+              filters: [{ name: 'Запись', extensions: ['csv'] }],
             });
 
+            const filePath = filePaths[0];
+
             if (!canceled) {
-              win.webContents.send(MenuClickEvent.OpenFile, filePaths);
+              win.webContents.send(MenuClickEvent.OpenFile, filePath);
             }
           },
         },
-        // { label: 'Загрузить параметры' },
-        // тут список раннее открытых файлов
+        { label: 'Загрузить параметры' },
       ],
     },
-    // {
-    //   label: 'Вид',
-    // },
+    {
+      label: 'Вид',
+    },
     {
       label: 'Инструменты',
       submenu: [
@@ -45,10 +46,10 @@ const buildMenu = (win: BrowserWindow) => {
         },
       ],
     },
-    // {
-    //   label: 'Помощь',
-    //   submenu: [{ label: 'Справка' }, { label: 'О программе' }, { label: 'Версии' }],
-    // },
+    {
+      label: 'Помощь',
+      submenu: [{ label: 'Справка' }, { label: 'О программе' }, { label: 'Версии' }],
+    },
   ];
 
   const menu = Menu.buildFromTemplate(template);

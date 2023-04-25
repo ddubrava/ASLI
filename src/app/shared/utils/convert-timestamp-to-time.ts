@@ -1,4 +1,7 @@
-export const convertTimestampToDate = (timestamp: number): string => {
+/**
+ * Parses timestamp and returns hh:mm:ss,sss pattern
+ */
+export const convertTimestampToTime = (timestamp: number): string => {
   const date = new Date(timestamp);
 
   const hours = date.getHours().toString().padStart(2, '0');

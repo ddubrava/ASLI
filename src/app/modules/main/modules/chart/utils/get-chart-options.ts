@@ -1,9 +1,9 @@
 import * as echarts from 'echarts';
-import { calculateGrid } from './calculate-grid';
+import { getGridSizes } from './get-grid-sizes';
 import { DataSource } from '../../../../../shared/types/data-source';
 import { Data } from '../../../../../shared/types/data';
 import { ParametersByName } from '../../../../../shared/types/parameters-by-name';
-import { convertTimestampToDate } from './convert-timestamp-to-date';
+import { convertTimestampToTime } from '../../../../../shared/utils/convert-timestamp-to-time';
 
 const getChartXAxis = (
   size: number,
@@ -107,19 +107,19 @@ const getAxisPointerConfig = (): echarts.AxisPointerComponentOption => ({
   label: {
     margin: 25,
     formatter(params) {
-      const series = params.seriesData[0].value as DataSource;
+      const seriesData = params.seriesData[0];
 
       /**
-       * On zooming in values can be undefined,
-       * it's a ECharts bug, I guess.
+       * On zooming in values can be undefined, since dataZoom.filterMode is set.
+       *
+       * @todo figure out if it's possible to get rid of this hack
        */
-      if (!series) {
+      if (!seriesData?.value) {
         return '-';
       }
 
-      const time = convertTimestampToDate(series.x);
-
-      const { name, y } = series;
+      const { name, x, y } = seriesData.value as DataSource;
+      const time = convertTimestampToTime(x);
 
       return `${y}, ${name} (${time})`;
     },
@@ -129,7 +129,7 @@ const getAxisPointerConfig = (): echarts.AxisPointerComponentOption => ({
 const getTooltipConfig = (): echarts.TooltipComponentOption => ({
   trigger: 'axis',
   formatter(params) {
-    const time = convertTimestampToDate((params[0].data as DataSource).x);
+    const time = convertTimestampToTime((params[0].data as DataSource).x);
 
     let text = `${time}`;
 
@@ -162,9 +162,13 @@ export const getChartOptions = (
       {
         type: 'inside',
         xAxisIndex: [0, 1, 2],
+        minSpan: 5,
+        // filterMode: 'none',
       },
       {
         xAxisIndex: [0, 1, 2],
+        minSpan: 5,
+        // filterMode: 'none',
         labelFormatter: (value, valueStr) => valueStr.split(' ').at(-1),
       },
     ],
@@ -197,7 +201,7 @@ export const getChartOptions = (
       yAxisIndex: i,
     }));
 
-    option.grid = calculateGrid(size);
+    option.grid = getGridSizes(size);
   } else {
     option.tooltip = getTooltipConfig();
 

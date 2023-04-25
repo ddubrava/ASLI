@@ -5,7 +5,6 @@ import { combineLatest, debounceTime, Subject, takeUntil } from 'rxjs';
 import { getChartOptions } from './utils/get-chart-options';
 import { OptionsService } from '../../../../shared/services/options/options.service';
 import { ZoningType } from '../../../../shared/types/zoning-type';
-import { DataZoomService } from '../../../../shared/services/data-zoom/data-zoom.service';
 import { ParametersService } from '../../../../shared/services/parameters/parameters.service';
 
 @Component({
@@ -22,14 +21,12 @@ export class ChartComponent implements AfterViewInit, OnDestroy {
   constructor(
     private dataService: DataService,
     private optionsService: OptionsService,
-    private dataZoomService: DataZoomService,
     private parameterService: ParametersService,
   ) {}
 
   ngAfterViewInit() {
     this.initChart();
     this.onDataAndOptionsChanges();
-    this.onDataZoomChanges();
   }
 
   ngOnDestroy() {
@@ -62,16 +59,5 @@ export class ChartComponent implements AfterViewInit, OnDestroy {
       .subscribe(([data, parameters, options]) => {
         this.setOption(getChartOptions(data, parameters, options.zoning === ZoningType.Arrange));
       });
-  }
-
-  private onDataZoomChanges() {
-    this.chart.on('dataZoom', () => {
-      const { startValue, endValue } = this.chart.getOption().dataZoom[0];
-
-      this.dataZoomService.dataZoom$.next({
-        startValue: startValue as number,
-        endValue: endValue as number,
-      });
-    });
   }
 }

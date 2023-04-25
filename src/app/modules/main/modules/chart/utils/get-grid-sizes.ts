@@ -1,4 +1,6 @@
-export const calculateGrid = (size: number): any => {
+import { GridSize } from '../types/grid-size';
+
+export const getGridSizes = (size: number): GridSize[] => {
   const grid = new Array(size);
 
   for (let i = 0; i < size; i++) {
