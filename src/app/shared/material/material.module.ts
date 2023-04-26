@@ -12,6 +12,7 @@ import { MatRadioModule } from '@angular/material/radio';
 import { CdkDrag, DragDropModule } from '@angular/cdk/drag-drop';
 import { MatTableModule } from '@angular/material/table';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { ScrollingModule } from '@angular/cdk/scrolling';
 
 const dependencies = [
   MatSidenavModule,
@@ -28,6 +29,7 @@ const dependencies = [
   CdkDrag,
   MatTableModule,
   MatTooltipModule,
+  ScrollingModule,
 ];
 
 @NgModule({

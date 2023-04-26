@@ -21,10 +21,12 @@ export class DataService {
     for (const record of records) {
       for (const [name, value] of Object.entries(record)) {
         /**
-         * @todo We shouldn't filter out these parameters,
-         *   but we need to improve perfomance first of all
+         * Contains an array of all data parsed from that row that extended beyond the header row.
+         * So we do not care about this property.
+         *
+         * @see https://www.papaparse.com/docs
          */
-        if (name === '__parsed_extra' || name === '' || name.startsWith('_')) {
+        if (name === '__parsed_extra') {
           continue;
         }
 

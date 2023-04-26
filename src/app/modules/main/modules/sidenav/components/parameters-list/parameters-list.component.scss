@@ -8,9 +8,18 @@
   width: 100%;
 }
 
+:host(.parameters-viewport_with-search) {
+  height: calc(100vh - 120px);
+}
+
+.parameters-viewport {
+  height: calc(100vh - 120px);
+}
+
 .parameter {
   display: flex;
   align-items: center;
+  height: 40px;
 
   &__color-picker {
     flex-shrink: 0;

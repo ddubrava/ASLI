@@ -2,14 +2,20 @@
 
 <mat-tab-group dynamicHeight>
   <mat-tab label="Все параметры">
-    <app-parameters-list></app-parameters-list>
+    <ng-template matTabContent>
+      <app-parameters-list></app-parameters-list>
+    </ng-template>
   </mat-tab>
 
   <mat-tab label="Выбранные">
-    <app-parameters-list [showOnlySelected]="true"></app-parameters-list>
+    <ng-template matTabContent>
+      <app-parameters-list [showOnlySelected]="true"></app-parameters-list>
+    </ng-template>
   </mat-tab>
 
   <mat-tab label="Поиск">
-    <app-parameters-list [showSearch]="true"></app-parameters-list>
+    <ng-template matTabContent>
+      <app-parameters-list [showSearch]="true"></app-parameters-list>
+    </ng-template>
   </mat-tab>
 </mat-tab-group>

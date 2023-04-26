@@ -1,4 +1,11 @@
-import { ChangeDetectionStrategy, Component, Input, OnDestroy, OnInit } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  HostBinding,
+  Input,
+  OnDestroy,
+  OnInit,
+} from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
 import { combineLatest, map, Observable, startWith, Subject, takeUntil } from 'rxjs';
 import { presetColors } from '../../../../../../shared/const/preset-colors';
@@ -16,7 +23,9 @@ const MAX_SELECTED_NUMBER = 3;
 export class ParametersListComponent implements OnInit, OnDestroy {
   @Input() showOnlySelected = false;
 
-  @Input() showSearch = false;
+  @HostBinding('class.parameters-viewport_with-search')
+  @Input()
+  showSearch = false;
 
   destroy$ = new Subject<void>();
 

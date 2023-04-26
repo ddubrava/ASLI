@@ -8,10 +8,6 @@ $sidenav-width: 400px;
 .sidenav {
   padding: 10px 0 0 10px;
   max-width: $sidenav-width;
-
-  ::ng-deep .mat-drawer-inner-container {
-    overflow: scroll;
-  }
 }
 
 .content {
