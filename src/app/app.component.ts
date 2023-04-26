@@ -8,8 +8,8 @@ import {
 import { ElectronService } from './shared/services/electron/electron.service';
 import { MenuClickEvent } from '../../app/types/menu-click-event';
 import { DataService } from './shared/services/data/data.service';
-import { parse } from 'csv-parse';
 import { Router } from '@angular/router';
+import * as Papa from 'papaparse';
 
 @Component({
   selector: 'app-root',
@@ -47,17 +47,14 @@ export class AppComponent implements OnInit {
   }
 
   private async openFile(filePath: string) {
-    const records = [];
+    const content = this.electronService.fs.readFileSync(filePath, 'utf8');
 
-    const parser = this.electronService.fs
-      .createReadStream(filePath)
-      .pipe(parse({ bom: true, delimiter: ';', columns: true, relax_column_count: true }));
+    const records = Papa.parse<Record<string, string>>(content, {
+      header: true,
+      skipEmptyLines: true,
+    });
 
-    for await (const record of parser) {
-      records.push(record);
-    }
-
-    this.dataService.init(records);
+    this.dataService.init(records.data);
     this.router.navigateByUrl('main');
   }
 

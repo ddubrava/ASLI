@@ -16,17 +16,18 @@ export class DataService {
   currentData$ = new ReplaySubject<Data>(1);
 
   init(records: Record<string, string>[]) {
-    /**
-     * csv-parse does not preserve order of records, so sort them by time
-     */
-    records.sort(
-      (a, b) => convertTimeToTimestamp(a[TIME_KEY]) - convertTimeToTimestamp(b[TIME_KEY]),
-    );
-
     const data: Data = {};
 
     for (const record of records) {
       for (const [name, value] of Object.entries(record)) {
+        /**
+         * @todo We shouldn't filter out these parameters,
+         *   but we need to improve perfomance first of all
+         */
+        if (name === '__parsed_extra' || name === '' || name.startsWith('_')) {
+          continue;
+        }
+
         if (!data[name]) {
           data[name] = [];
         }
