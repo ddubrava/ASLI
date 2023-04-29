@@ -1,4 +1,5 @@
 export enum MenuClickEvent {
   OpenFile = 'open_file',
-  Statistics = 'statistics',
+  OpenStatistics = 'open_statistics',
+  ChangeZoning = 'change_zoning',
 }

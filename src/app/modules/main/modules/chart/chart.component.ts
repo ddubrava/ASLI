@@ -2,10 +2,11 @@ import { AfterViewInit, ChangeDetectionStrategy, Component, OnDestroy } from '@a
 import * as echarts from 'echarts';
 import { DataService } from '../../../../shared/services/data/data.service';
 import { combineLatest, debounceTime, Subject, takeUntil } from 'rxjs';
-import { getChartOptions } from './utils/get-chart-options';
+import { getChartOption } from './utils/get-chart-option';
 import { OptionsService } from '../../../../shared/services/options/options.service';
-import { ZoningType } from '../../../../shared/types/zoning-type';
+import { ZoningType } from '../../../../../../app/types/zoning-type';
 import { ParametersService } from '../../../../shared/services/parameters/parameters.service';
+import { CHART_ID } from './const/chart-id';
 
 @Component({
   selector: 'app-chart',
@@ -14,6 +15,8 @@ import { ParametersService } from '../../../../shared/services/parameters/parame
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ChartComponent implements AfterViewInit, OnDestroy {
+  readonly chartId = CHART_ID;
+
   private destroy$ = new Subject<void>();
 
   private chart: echarts.ECharts;
@@ -57,7 +60,34 @@ export class ChartComponent implements AfterViewInit, OnDestroy {
         takeUntil(this.destroy$),
       )
       .subscribe(([data, parameters, options]) => {
-        this.setOption(getChartOptions(data, parameters, options.zoning === ZoningType.Arrange));
+        this.setOption(
+          getChartOption(
+            data,
+            parameters,
+            options.zoning === ZoningType.Arrange,
+            this.getDataZoomRange(),
+          ),
+        );
       });
+  }
+
+  /**
+   * Returns chart.dataZoom values.
+   * Default values are 0 and 100.
+   */
+  private getDataZoomRange(): [number, number] {
+    let start = 0;
+    let end = 100;
+
+    const option = this.chart.getOption();
+
+    if (option) {
+      const { dataZoom } = option;
+
+      start = dataZoom[0].start;
+      end = dataZoom[0].end;
+    }
+
+    return [start, end];
   }
 }

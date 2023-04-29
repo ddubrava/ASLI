@@ -10,6 +10,8 @@ import { MenuClickEvent } from '../../app/types/menu-click-event';
 import { DataService } from './shared/services/data/data.service';
 import { Router } from '@angular/router';
 import * as Papa from 'papaparse';
+import { ZoningType } from '../../app/types/zoning-type';
+import { OptionsService } from './shared/services/options/options.service';
 
 @Component({
   selector: 'app-root',
@@ -23,12 +25,21 @@ export class AppComponent implements OnInit {
   constructor(
     private electronService: ElectronService,
     private dataService: DataService,
+    private optionsService: OptionsService,
     private router: Router,
     private ngZone: NgZone,
     private cdr: ChangeDetectorRef,
   ) {}
 
   ngOnInit() {
+    this.watchForMenuClickEvents();
+  }
+
+  onStatisticsCloseClick() {
+    this.toggleStatisticsComponent();
+  }
+
+  private watchForMenuClickEvents() {
     const { ipcRenderer } = this.electronService;
 
     if (ipcRenderer) {
@@ -36,14 +47,14 @@ export class AppComponent implements OnInit {
         this.ngZone.run(() => this.openFile(filePath));
       });
 
-      ipcRenderer.on(MenuClickEvent.Statistics, () => {
+      ipcRenderer.on(MenuClickEvent.OpenStatistics, () => {
         this.ngZone.run(() => this.toggleStatisticsComponent());
       });
-    }
-  }
 
-  onStatisticsCloseClick() {
-    this.toggleStatisticsComponent();
+      ipcRenderer.on(MenuClickEvent.ChangeZoning, (_, type: ZoningType) => {
+        this.ngZone.run(() => this.optionsService.options$.next({ zoning: type }));
+      });
+    }
   }
 
   private async openFile(filePath: string) {

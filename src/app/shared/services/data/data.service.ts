@@ -21,8 +21,8 @@ export class DataService {
     for (const record of records) {
       for (const [name, value] of Object.entries(record)) {
         /**
-         * Contains an array of all data parsed from that row that extended beyond the header row.
-         * So we do not care about this property.
+         * __parsed_extra contains an array of all data parsed from that row that extended beyond the header row.
+         * So we should skip the property, since we do not care about this.
          *
          * @see https://www.papaparse.com/docs
          */

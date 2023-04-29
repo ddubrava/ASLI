@@ -3,12 +3,16 @@ import * as path from 'path';
 import * as fs from 'fs';
 
 import { MenuClickEvent } from './types/menu-click-event';
+import { ZoningType } from './types/zoning-type';
 
 let win: BrowserWindow = null;
 
 const args = process.argv.slice(1);
 const serve = args.some((val) => val === '--serve');
 
+/**
+ * Builds applications menu.
+ */
 const buildMenu = (win: BrowserWindow) => {
   const template: MenuItemConstructorOptions[] = [
     {
@@ -34,6 +38,28 @@ const buildMenu = (win: BrowserWindow) => {
     },
     {
       label: 'Вид',
+      submenu: [
+        {
+          label: 'Зонирование',
+          submenu: [
+            {
+              label: 'Расставить графики',
+              type: 'radio',
+              checked: true,
+              click() {
+                win.webContents.send(MenuClickEvent.ChangeZoning, ZoningType.Arrange);
+              },
+            },
+            {
+              label: 'Совместить графики',
+              type: 'radio',
+              click() {
+                win.webContents.send(MenuClickEvent.ChangeZoning, ZoningType.Combine);
+              },
+            },
+          ],
+        },
+      ],
     },
     {
       label: 'Инструменты',
@@ -41,7 +67,7 @@ const buildMenu = (win: BrowserWindow) => {
         {
           label: 'Статистика',
           click() {
-            win.webContents.send(MenuClickEvent.Statistics);
+            win.webContents.send(MenuClickEvent.OpenStatistics);
           },
         },
       ],
@@ -68,7 +94,8 @@ const createWindow = (): BrowserWindow => {
     webPreferences: {
       nodeIntegration: true,
       allowRunningInsecureContent: serve,
-      contextIsolation: false, // false if you want to run e2e test with Spectron
+      // false if you want to run e2e test with Spectron
+      contextIsolation: false,
     },
   });
 

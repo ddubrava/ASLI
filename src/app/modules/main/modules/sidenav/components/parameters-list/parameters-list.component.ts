@@ -12,7 +12,7 @@ import { presetColors } from '../../../../../../shared/const/preset-colors';
 import { ParametersService } from '../../../../../../shared/services/parameters/parameters.service';
 import { ParametersForm } from '../../../../../../shared/types/parameters-form';
 
-const MAX_SELECTED_NUMBER = 3;
+const MAX_SELECTED_NUMBER = 5;
 
 @Component({
   selector: 'app-parameters-list',
@@ -80,9 +80,9 @@ export class ParametersListComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Enables/disabled parameters checkboxes based on MAX_SELECTED_NUMBER.
+   * Enables/disables parameters checkboxes based on MAX_SELECTED_NUMBER.
    * The logic is not efficient, since we already traverse over parameters in controls$.
-   * But parameters array is small (~250), so all this stuff is pretty fast.
+   * But parameters array is small (~1k), so all this stuff is pretty fast.
    */
   private toggleParameters() {
     const selected = this.parametersFormArray.controls.reduce(
