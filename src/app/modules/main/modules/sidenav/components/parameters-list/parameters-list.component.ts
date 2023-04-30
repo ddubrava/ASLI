@@ -53,7 +53,12 @@ export class ParametersListComponent implements OnInit, OnDestroy {
         });
       }
 
-      return controls;
+      /**
+       * cdkVirtualFor ignores changes in the same instance,
+       * it doesn't even call a trackBy function,
+       * so make a shallow copy.
+       */
+      return [...controls];
     }),
     startWith(this.parametersFormArray.controls),
   );

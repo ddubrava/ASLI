@@ -37,7 +37,7 @@ export class ParametersService {
 
   private watchForAllDataChanges() {
     this.dataService.allData$.subscribe((allData) => {
-      this.parameters.clear();
+      this.parameters.clear({ emitEvent: false });
       this.fillFormArray(allData);
     });
   }
@@ -49,6 +49,11 @@ export class ParametersService {
     });
   }
 
+  /**
+   * Fills a form array using push method.
+   * We can't directly assign a new value to the form array,
+   * since it won't trigger value changes.
+   */
   private fillFormArray(allData: Data) {
     const parameters = Object.keys(allData);
 
@@ -59,7 +64,8 @@ export class ParametersService {
         selected: false,
       });
 
-      this.parameters.push(group);
+      // Emit event only for the last element, so we do not trigger valueChanges for each control.
+      this.parameters.push(group, { emitEvent: index === parameters.length - 1 });
     });
   }
 }
