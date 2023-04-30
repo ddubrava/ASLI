@@ -7,6 +7,7 @@ import { OptionsService } from '../../../../shared/services/options/options.serv
 import { ZoningType } from '../../../../../../app/types/zoning-type';
 import { ParametersService } from '../../../../shared/services/parameters/parameters.service';
 import { CHART_ID } from './const/chart-id';
+import { DataZoomService } from '../../../../shared/services/data-zoom/data-zoom.service';
 
 @Component({
   selector: 'app-chart',
@@ -25,11 +26,13 @@ export class ChartComponent implements AfterViewInit, OnDestroy {
     private dataService: DataService,
     private optionsService: OptionsService,
     private parameterService: ParametersService,
+    private dataZoomService: DataZoomService,
   ) {}
 
   ngAfterViewInit() {
     this.initChart();
     this.onDataAndOptionsChanges();
+    this.onDataZoomChanges();
   }
 
   ngOnDestroy() {
@@ -69,6 +72,24 @@ export class ChartComponent implements AfterViewInit, OnDestroy {
           ),
         );
       });
+  }
+
+  private onDataZoomChanges() {
+    this.chart.on('dataZoom', () => {
+      /**
+       * This is the only approach that works, since data zoom startValue and endValue are invalid,
+       * they are formatted by EChart and cannot be mapped to original values.
+       * E.g. the original value is 1682850281210, ECharts returns 1682850281399.8394
+       *
+       * @see https://github.com/apache/echarts/issues/17919
+       */
+      const xAxisExtent: [number, number] = (this.chart as any)
+        .getModel()
+        .getComponent('xAxis', 0)
+        .axis.scale.getExtent();
+
+      this.dataZoomService.dataZoom$.next(xAxisExtent);
+    });
   }
 
   /**

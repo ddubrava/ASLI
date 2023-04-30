@@ -4,6 +4,8 @@ import { MatTable } from '@angular/material/table';
 import { combineLatest, debounceTime, Subject, takeUntil } from 'rxjs';
 import { DataService } from '../../../../shared/services/data/data.service';
 import { ParametersService } from '../../../../shared/services/parameters/parameters.service';
+import { DataZoomService } from '../../../../shared/services/data-zoom/data-zoom.service';
+import { DataSource } from '../../../../shared/types/data-source';
 
 @Component({
   selector: 'app-statistics-table',
@@ -30,7 +32,11 @@ export class StatisticsTableComponent implements OnInit, OnDestroy {
 
   private destroy$ = new Subject<void>();
 
-  constructor(private dataService: DataService, private parametersService: ParametersService) {}
+  constructor(
+    private dataService: DataService,
+    private parametersService: ParametersService,
+    private dataZoomService: DataZoomService,
+  ) {}
 
   ngOnInit() {
     this.watchForDataAndParametersChanges();
@@ -42,7 +48,11 @@ export class StatisticsTableComponent implements OnInit, OnDestroy {
   }
 
   private watchForDataAndParametersChanges() {
-    combineLatest([this.dataService.currentData$, this.parametersService.selectedParameters$])
+    combineLatest([
+      this.dataService.currentData$,
+      this.parametersService.selectedParameters$,
+      this.dataZoomService.dataZoom$,
+    ])
       .pipe(
         /**
          * When currentData & selectedParameters$ are changed at the same time
@@ -50,33 +60,54 @@ export class StatisticsTableComponent implements OnInit, OnDestroy {
         debounceTime(0),
         takeUntil(this.destroy$),
       )
-      .subscribe(([data, parameters]) => {
-        this.dataSource$.next(
-          Object.values(data).map((source) => {
-            const values = source.map((s) => s.y);
+      .subscribe(([data, parameters, dataZoom]) => {
+        const dataSource: StatisticsElement[] = Object.values(data).map((source) => {
+          const values = this.filterDataByZoom(source, dataZoom);
 
-            const parameterName = source[0].name;
-            const parameter = parameters[parameterName];
+          const parameterName = source[0].name;
+          const parameter = parameters[parameterName];
 
-            const [parameterNameWithoutUnit, parameterUnit] = parameterName.split(', ');
+          const [parameterNameWithoutUnit, parameterUnit] = parameterName.split(', ');
 
-            const expectedValue = this.getExpectedValue(values);
-            const variance = this.getVariance(values, expectedValue);
+          const expectedValue = this.getExpectedValue(values);
+          const variance = this.getVariance(values, expectedValue);
 
-            return {
-              color: parameter.color,
-              parameterName: parameterNameWithoutUnit,
-              minimum: this.getMin(values),
-              maximum: this.getMax(values),
-              average: this.getAverage(values),
-              expectedValue,
-              variance,
-              sigma: this.getSigma(variance),
-              unit: parameterUnit || '',
-            };
-          }),
-        );
+          return {
+            color: parameter.color,
+            parameterName: parameterNameWithoutUnit,
+            minimum: this.getMin(values),
+            maximum: this.getMax(values),
+            average: this.getAverage(values),
+            expectedValue,
+            variance,
+            sigma: this.getSigma(variance),
+            unit: parameterUnit || '',
+          };
+        });
+
+        this.dataSource$.next(dataSource);
       });
+  }
+
+  private filterDataByZoom(source: DataSource[], dataZoom: [number, number] | []): number[] {
+    const [dataZoomStartValue, dataZoomEndValue] = dataZoom;
+
+    return source.reduce<number[]>((acc, value) => {
+      const { x, y } = value;
+
+      /**
+       * If data zoom values are undefined, zoom is 0-100%.
+       */
+      if (!dataZoomStartValue || !dataZoomEndValue) {
+        return [...acc, y];
+      }
+
+      if (x >= dataZoomStartValue && x <= dataZoomEndValue) {
+        return [...acc, y];
+      }
+
+      return acc;
+    }, []);
   }
 
   private getMin(data: number[]) {
