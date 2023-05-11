@@ -12,6 +12,7 @@ export const getChartYAxis = (
   for (let i = 0; i < size; i++) {
     const axis: echarts.EChartsOption['yAxis'] = {
       type: 'value',
+      scale: true,
       axisPointer: {
         show: false,
       },
