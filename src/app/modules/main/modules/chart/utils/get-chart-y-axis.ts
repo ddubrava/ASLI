@@ -1,6 +1,7 @@
 import { DataSource } from '../../../../../shared/types/data-source';
 import { ParametersByName } from '../../../../../shared/types/parameters-by-name';
 import * as echarts from 'echarts';
+import { TIME_KEY } from '../../../../../shared/const/time-key';
 
 export const getChartYAxis = (
   size: number,
@@ -24,6 +25,11 @@ export const getChartYAxis = (
     if (data[i][0]) {
       const name = data[i][0].name;
       const color = parameters[name].color;
+
+      if (name === TIME_KEY) {
+        axis.type = 'time' as any;
+        axis.splitLine = { show: true };
+      }
 
       axis.name = name;
       axis.nameTextStyle = { color, align: 'left' };

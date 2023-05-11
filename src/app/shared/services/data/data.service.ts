@@ -2,8 +2,7 @@ import { Injectable } from '@angular/core';
 import { ReplaySubject, take } from 'rxjs';
 import { Data } from '../../types/data';
 import { convertTimeToTimestamp } from '../../utils/convert-data-to-timestamp';
-
-const TIME_KEY = 'Time';
+import { TIME_KEY } from '../../const/time-key';
 
 @Injectable({
   providedIn: 'root',
@@ -35,9 +34,11 @@ export class DataService {
         }
 
         /**
-         * Filter NaN values
+         * TIME_KEY has an ISO format, we should handle this case specifically.
+         * Otherwise, just try to parse a value.
          */
-        const parsedValue = parseFloat(value.replace(/,/g, '.'));
+        const parsedValue =
+          name === TIME_KEY ? convertTimeToTimestamp(value) : parseFloat(value.replace(/,/g, '.'));
 
         if (isNaN(parsedValue)) {
           continue;
@@ -45,7 +46,7 @@ export class DataService {
 
         data[name].push({
           x: convertTimeToTimestamp(record[TIME_KEY]),
-          y: parsedValue,
+          y: parsedValue as any,
           name,
         });
       }

@@ -1,6 +1,7 @@
 import * as echarts from 'echarts';
 import { DataSource } from '../../../../../shared/types/data-source';
 import { convertTimestampToTime } from '../../../../../shared/utils/convert-timestamp-to-time';
+import { TIME_KEY } from '../../../../../shared/const/time-key';
 
 export const getAxisPointerOption = (): echarts.AxisPointerComponentOption => ({
   show: true,
@@ -30,6 +31,10 @@ export const getAxisPointerOption = (): echarts.AxisPointerComponentOption => ({
 
       const { name, x, y } = seriesData.value as DataSource;
       const time = convertTimestampToTime(x);
+
+      if (name === TIME_KEY) {
+        return `${name} (${time})`;
+      }
 
       return `${y}, ${name} (${time})`;
     },
