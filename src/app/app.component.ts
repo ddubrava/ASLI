@@ -44,7 +44,7 @@ export class AppComponent implements OnInit {
 
     if (ipcRenderer) {
       ipcRenderer.on(MenuClickEvent.OpenFile, (_, filePath) => {
-        this.ngZone.run(() => this.openFile(filePath));
+        this.ngZone.run(() => this.initDataService(filePath));
       });
 
       ipcRenderer.on(MenuClickEvent.OpenStatistics, () => {
@@ -57,7 +57,7 @@ export class AppComponent implements OnInit {
     }
   }
 
-  private async openFile(filePath: string) {
+  private async initDataService(filePath: string) {
     const content = this.electronService.fs.readFileSync(filePath, 'utf8');
 
     const records = Papa.parse<Record<string, string>>(content, {
